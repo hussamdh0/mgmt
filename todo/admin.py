@@ -11,7 +11,7 @@ from django.db import models
 
 class TaskInline(admin.TabularInline):
     model = Task
-    readonly_fields = ["all_done",]
+    readonly_fields = ['all_done', 'root_pk']
     
     formfield_overrides = {
         models.CharField: {'widget': TextInput(attrs={'size':'25'})},
@@ -63,13 +63,13 @@ class ParentListFilter(admin.SimpleListFilter):
         
 @admin.register(Task)
 class testAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'parent', 'important', 'done', 'all_done', 'desc',)
+    list_display = ('__str__', 'parent', 'important', 'done', 'all_done', 'full_name',)
     fieldsets = (
         ('Parent Task', {'fields': (('name', 'parent',),)}),
         ('description', {'fields': ('description',)}),
         ('attrs', {'fields': (('important', 'done',), ('non_completed_tasks', 'all_done',),)}),
     )
-    readonly_fields = ['all_done', 'non_completed_tasks']
+    readonly_fields = ['all_done', 'non_completed_tasks', 'root_pk']
     inlines = [TaskInline,]
     list_filter = [
         LevelListFilter,

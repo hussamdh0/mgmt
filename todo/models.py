@@ -74,13 +74,19 @@ class Task(BaseModel):
 
     @property
     def desc(self):
+        if len(self.description) > 25:
+            return self.description[:25] + '...'
+        return self.description
+
+    @property
+    def full_name(self):
         if hasattr(self, 'pk') and getattr(self, 'pk'):
             if self.all_done != self._all_done or self.root_pk != self._root_pk:
                 self.save()
         
-        if len(self.description) > 25:
-            return self.description[:25] + '...'
-        return self.description
+        if not self.parent:
+            return self.name
+        return f'{self.parent.full_name} : {self.name}'
     
     def save(self, *args, **kwargs):
         self.all_done = self._all_done
