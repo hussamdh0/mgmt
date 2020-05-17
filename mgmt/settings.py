@@ -8,8 +8,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
-    'http://167.71.46.156/',
-    'http://hussamtech.de/',
+    '167.71.46.156',
+    'hussamtech.de',
 ]
 
 
