@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import Q
+
 
 NN = {'null': True, 'blank': True}
 NNN = {**NN, 'default': None}
@@ -17,6 +19,7 @@ IF = models.IntegerField
 FK = models.ForeignKey
 
 MDL = models.Model
+MGR = models.Manager
 
 def text(s=''):
     if len(s)>0: return models.CharField(s, **CNNE)
