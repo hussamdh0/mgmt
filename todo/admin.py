@@ -1,17 +1,20 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
+
 from .models import Task
 from django.forms import TextInput, Textarea
 from django.db import models
 
-# admin.site.site_header = "Manzoul e. V. Admin"
-# admin.site.site_title = "Manzoul e. V. Admin Portal"
-# admin.site.index_title = "Welcome to Manzoul e. V."
+from django.urls import path
 
+admin.site.site_header = "TODO"
+admin.site.site_title = "TODO App"
+admin.site.index_title = "Welcome to TODO app"
 
 
 class TaskInline(admin.TabularInline):
     model = Task
-    readonly_fields = ['all_done', 'root_pk']
+    readonly_fields = ['subtasks_done', 'root_pk']
     
     formfield_overrides = {
         models.CharField: {'widget': TextInput(attrs={'size':'25'})},
@@ -47,10 +50,10 @@ class LevelListFilter(admin.SimpleListFilter):
             return Task.objects.remaining_tasks(qs=queryset)
         return queryset
     
-class ParentListFilter(admin.SimpleListFilter):
-    title = 'parent'
+class RootListFilter(admin.SimpleListFilter):
+    title = 'root'
 
-    parameter_name = 'parent'
+    parameter_name = 'root'
 
     def lookups(self, request, model_admin):
         return [(e.pk, e.name) for e in Task.objects.main_tasks()]
@@ -62,19 +65,41 @@ class ParentListFilter(admin.SimpleListFilter):
         return queryset
         
 @admin.register(Task)
-class testAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'parent', 'important', 'done', 'all_done', 'full_name',)
+class TaskAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        '__str__',
+        'parent',
+        'due',
+        'important',
+        'done',
+        'subtasks_done',
+        'full_name',)
     fieldsets = (
         ('Parent Task', {'fields': (('name', 'parent',),)}),
         ('description', {'fields': ('description',)}),
-        ('attrs', {'fields': (('important', 'done',), ('non_completed_tasks', 'all_done',),)}),
+        ('attrs', {'fields': (('important', 'done',), ('non_completed_tasks', 'subtasks_done',),)}),
     )
-    readonly_fields = ['all_done', 'non_completed_tasks', 'root_pk']
+    readonly_fields = ['subtasks_done', 'non_completed_tasks', 'root_pk']
     inlines = [TaskInline,]
     list_filter = [
         LevelListFilter,
-        ParentListFilter,
+        RootListFilter,
         'done',
-        'all_done',
+        'subtasks_done',
         'important',
     ]
+
+    def due(self, obj):
+        return obj.due
+    due.admin_order_field = 'due'
+    
+    def get_urls(self):
+        urls = super(TaskAdmin, self).get_urls()
+        my_urls = [path("export/", export)]
+        return my_urls + urls
+
+def export(request):
+    for e in Task.objects.all():
+        e.refresh()
+    return HttpResponseRedirect(request.META["HTTP_REFERER"])

@@ -1,3 +1,8 @@
-from django.shortcuts import render
+# from django.shortcuts       import render
+#
+#
+# def refresh(request):
+#     context = {'articles': Article.objects.all(),
+#                **get_conf_dict(request)}
+#     return render(request, 'index.html', context)
 
-# Create your views here.
